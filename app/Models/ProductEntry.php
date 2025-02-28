@@ -16,6 +16,13 @@ class ProductEntry extends Model
     public $timestamps = false;
     public $incrementing = false;
 
+    protected $keyType = 'string';
+
+    protected $casts = [
+        'product_ean' => 'string',
+    ];
+
+
     public function sheet(): belongsTo {
         return $this->belongsTo(Sheet::class, 'sheet_id');
     }

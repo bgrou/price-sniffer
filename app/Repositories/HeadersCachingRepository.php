@@ -11,19 +11,13 @@ class HeadersCachingRepository
 
     public function firstOrCreate($find, $input): object
     {
-        Log::info($find);
-        Log::info($input);
         return $this->headersCaching->firstOrCreate($find, $input);
     }
 
     public function find($key) {
-        Log::info("Key: " . $key);
-        $output = HeadersCaching::
+        return HeadersCaching::
             where('key', $key)
             ->first()
             ->value ?? null;
-
-        Log::info("Output: " . $output);
-        return $output;
     }
 }

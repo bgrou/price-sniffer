@@ -13,6 +13,7 @@ async function getData(): Promise<ProductEntry[]> {
     // Fetch data from your API here.
     try {
         const response = await axios.get('/product-entries'); // Adjust the URL to your API endpoint
+        console.log(response.data);
         return response.data;
     } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -23,81 +24,14 @@ async function getData(): Promise<ProductEntry[]> {
 onMounted(async () => {
     data.value = await getData()
 })
-
-const fileInput = ref(null);
-const files = ref([]);
-const isUploading = ref(false); // Loading state
-
-const form = useForm({
-    files: [],
-});
-
-const triggerFileInput = () => {
-    fileInput.value.click();
-};
-
-const handleFileChange = (event) => {
-    files.value = Array.from(event.target.files);
-    form.files = [...files.value]; // Ensure reactive assignment
-};
-
-const uploadFiles = () => {
-    if (files.value.length === 0) return;
-
-    isUploading.value = true;
-
-    form.post("/upload-sheet", {
-        onSuccess: () => {
-            alert("Files uploaded successfully!");
-            files.value = [];
-            form.files = [];
-            fileInput.value.value = ""; // Reset input field
-            isUploading.value = false;
-        },
-        onError: (errors) => {
-            alert("File upload failed! " + JSON.stringify(errors));
-            isUploading.value = false;
-        }
-    });
-};
 </script>
 
 <template>
     <Head title="Dashboard" />
 
     <AuthenticatedLayout>
-        <!-- Hidden file input -->
-        <input
-            type="file"
-            multiple
-            ref="fileInput"
-            class="hidden"
-            @change="handleFileChange"
-        />
-
-        <!-- Button to trigger file selection -->
-        <Button @click="triggerFileInput">Select Files</Button>
-
-        <!-- Upload Button with Loading State -->
-        <Button
-            v-if="files.length"
-            class="ml-2"
-            @click="uploadFiles"
-            :disabled="isUploading"
-        >
-            <span v-if="isUploading">Uploading...</span>
-            <span v-else>Upload Files</span>
-        </Button>
-
-        <!-- File List Preview -->
-        <ul v-if="files.length" class="mt-4">
-            <li v-for="(file, index) in files" :key="index">
-                {{ file.name }} ({{ (file.size / 1024).toFixed(2) }} KB)
-            </li>
-        </ul>
-
         <div class="container py-10 mx-auto">
-            <DataTable :columns="columns" :data="data" />
+            <DataTable :columns="columns" :data=null />
         </div>
     </AuthenticatedLayout>
 </template>

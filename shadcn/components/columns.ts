@@ -9,7 +9,7 @@ export const columns: ColumnDef<ProductEntry>[] = [
             return h('div', { class: 'flex justify-start' }, [
                 h('span', 'Sheet'),
                 h(ArrowUpDown, {
-                    class: 'h-4 w-4',
+                    class: 'h-4 w-4 font-bold',
                     style: "cursor: 'pointer'; margin-left:10px",
                     onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
                 }),
@@ -29,7 +29,7 @@ export const columns: ColumnDef<ProductEntry>[] = [
                 }),
             ])
         },
-        cell: ({ row }) => h('div', row.getValue('ean')),
+        cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('ean')),
     },
     {
         accessorKey: 'description',
@@ -43,7 +43,7 @@ export const columns: ColumnDef<ProductEntry>[] = [
                 }),
             ])
         },
-        cell: ({ row }) => h('div', row.getValue('description')),
+        cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('description')),
     },
     {
         accessorKey: 'stock',
@@ -57,7 +57,12 @@ export const columns: ColumnDef<ProductEntry>[] = [
                 }),
             ])
         },
-        cell: ({ row }) => h('div', { class: 'text-right font-medium' }, row.getValue('stock')),
+
+        cell: ({ row }) => {
+            const stockValue = Number.parseFloat(row.getValue('stock'))
+            const textColorClass = stockValue === 0 ? 'text-red-500' : 'text-green-500'
+            return h('div', { class: ['text-right', 'font-medium', textColorClass] }, stockValue)
+        },
     },
     {
         accessorKey: 'price',
@@ -78,7 +83,8 @@ export const columns: ColumnDef<ProductEntry>[] = [
                 currency: 'GBP',
             }).format(amount)
 
-            return h('div', { class: 'text-right font-medium' }, formatted)
+
+            return h('div', { class: ['text-right', 'font-medium'] }, formatted)
         },
     }
 ]

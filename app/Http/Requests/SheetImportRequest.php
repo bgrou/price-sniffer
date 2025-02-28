@@ -24,7 +24,7 @@ class SheetImportRequest extends FormRequest
     {
         return [
             'files' => 'required',
-            'files.*' => 'file|mimes:xlsx,xls|max:300'
+//            'files.*' => 'file|mimes:xlsx,xls|max:10000'
         ];
     }
 }

@@ -14,6 +14,8 @@ class ExchangeRatesService
             ->all();
     }
 
+
+
     public function update($rates): void
     {
         foreach ($rates as $symbol => $newRate) {

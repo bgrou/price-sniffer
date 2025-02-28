@@ -42,8 +42,6 @@ class ExchangeRatesApi extends Command
 
             if ($response->successful()) {
                 $data = $response->json();
-                Log::info($data);
-                Log::info($data['rates']);
                 $gbpRates = $this->convertEURBaseToGBP($data['rates']);
                 $exchangeRatesService->update($gbpRates);
                 return $gbpRates;

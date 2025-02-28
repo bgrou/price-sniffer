@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { SidebarProps } from '.'
 import { Sheet, SheetContent } from '/shadcn/components/ui/sheet'
-import { cn } from '/shadcn/lib/utils'
-import { SIDEBAR_WIDTH_MOBILE, useSidebar } from './utils'
+import { cn } from '/shadcn/lib/utils.ts'
+import { SIDEBAR_WIDTH_MOBILE, useSidebar } from './utils.ts'
 
 defineOptions({
   inheritAttrs: false,
