@@ -38,6 +38,7 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit">
+            @csrf
             <div>
                 <InputLabel for="email" value="Email" />
 
