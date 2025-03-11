@@ -14,7 +14,6 @@ use Illuminate\Queue\SerializesModels;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Barryvdh\Debugbar\Facade as Debugbar;
 
 
 
@@ -53,7 +52,6 @@ class ProcessSheetImport implements ShouldQueue
             ['name' => $sheetName],
             ['currency_key' => $currencyKey]
         );
-        Debugbar::info("Sheet Created");
         $import->setFullPath($fullPath);
         $import->setSheet($sheet);
         $import->setCurrencyKey($currencyKey);

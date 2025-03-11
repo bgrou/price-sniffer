@@ -12,6 +12,7 @@ class SheetImportController extends Controller
     public function __construct(private SheetImportService $service){}
     public function import(SheetImportRequest $request): \Illuminate\Http\RedirectResponse
     {
+        file_put_contents(storage_path('logs/dbg.log'),'');
         foreach ($request->file('files') as $file) {
             $originalName = $file->getClientOriginalName();
             $filePath = $file->storeAs('xlsx_uploads', $originalName, 'public');
