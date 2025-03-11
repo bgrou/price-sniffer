@@ -16,6 +16,8 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Events\BeforeImport;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\Debugbar\Facade as Debugbar;
+
 
 #[AllowDynamicProperties]
 class ChunkedSheetImport implements ToCollection, WithChunkReading
@@ -53,10 +55,15 @@ class ChunkedSheetImport implements ToCollection, WithChunkReading
     }
 
 
+    /**
+     * @throws Exception
+     */
     public function collection(Collection $rows)
     {
+        Debugbar::info("Importing chunked sheet...");
         // Convert the Collection into an array
         $dataArray = $rows->toArray();
+        Debugbar::info($dataArray);
 
         // Parse the data using the array form
         $rows = [];
@@ -78,46 +85,46 @@ class ChunkedSheetImport implements ToCollection, WithChunkReading
     {
         $result = [];
         foreach ($data as $row) {
-            Log::channel('dbg')->info(print_r($row,true));
+            Debugbar::info(print_r($row,true));
             if ($this->isRowEmpty($row)) {
-            Log::channel('dbg')->info("Row empty");
+            Debugbar::info("Row empty");
                 continue;
             }
 
             if (!$this->headersFound && $this->containsHeader($row)) {
-                Log::channel('dbg')->info("Header Found");
+                Debugbar::info("Header Found");
 
                 $this->headersFound = true;
                 $cache = $this->headersCachingService->get($row);
 
                 if (!$cache) {
-                    Log::channel('dbg')->info("Ai used for headers");
+                    Debugbar::info("Ai used for headers");
                     $this->headersPos = $this->ai->request($row)->original;
                     $this->headersCachingService->firstOrCreate($row, $this->headersPos);
                 } else {
-                    Log::channel('dbg')->info("Cache used for headers");
+                    Debugbar::info("Cache used for headers");
                     $this->headersPos = $cache;
                 }
-                Log::channel('dbg')->info("Header Positions: " . print_r($this->headersPos, true));
+                Debugbar::info("Header Positions: " . print_r($this->headersPos, true));
                 continue;
             }
-            Log::channel('dbg')->info("Row processing:");
+            Debugbar::info("Row processing:");
             if ($this->headersFound) {
                 $extractedFields = [];
                 foreach (["EAN", "Description", "Stock", "Price"] as $field) {
 
                     $position = $this->headersPos[$field] ?? null;
 
-                    Log::channel('dbg')->info("Position: " . $position);
+                    Debugbar::info("Position: " . $position);
                     $extractedFields[$field] = ($position !== null && isset($row[$position])) ? $row[$position] : null;
-                    Log::channel('dbg')->info("Extracted Field: " . $extractedFields[$field]);
-                    Log::channel('dbg')->info("Extracted Fields: " . print_r($extractedFields, true));
+                    Debugbar::info("Extracted Field: " . $extractedFields[$field]);
+                    Debugbar::info("Extracted Fields: " . print_r($extractedFields, true));
                 }
                 if (!empty($extractedFields['EAN']) && !empty($extractedFields['Description']) && !empty($extractedFields['Price'])) {
                     $result[] = $extractedFields;
                 }
             }
-            Log::channel('dbg')->info(print_r($result,true));
+            Debugbar::info(print_r($result,true));
         }
         return $result;
     }
