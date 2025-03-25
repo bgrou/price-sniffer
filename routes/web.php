@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Dashboard');
+    return Inertia::render('UploadSheets');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/upload-sheet', [SheetImportController::class, 'import'])->name('upload-sheet');
+    Route::get('/upload-status', [SheetImportController::class, 'status'])->name('upload-status');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

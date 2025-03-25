@@ -41,7 +41,9 @@ class ProductsExport implements FromCollection, WithHeadings, WithMapping, WithE
                 $exchangeRate = $exchangeRates[$currency] ?? 1;
 
                 // Adjust the price using the exchange rate
-                $convertedPrice = round($lowestPrice->price / $exchangeRate, 2);
+                // Ensure price is a float before division
+                $price = (float)$lowestPrice->price;
+                $convertedPrice = round($price / $exchangeRate, 2);
 
                 return [
                     'ean' => $product->ean, // Preserve leading zeros for Excel

@@ -3,19 +3,57 @@ import AuthenticatedLayout from "/resources/js/Layouts/AuthenticatedLayout.vue";
 import {Head, useForm} from "@inertiajs/vue3";
 import {Button} from "/shadcn/components/ui/button";
 import type {ProductEntry} from '/shadcn/components/columns.ts'
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, onUnmounted} from 'vue'
 import {columns} from '/shadcn/components/columns'
 import DataTable from '/shadcn/components/DataTable.vue'
 import UploadFileIcon from "/resources/js/Components/UploadFileIcon.vue";
 import { router } from '@inertiajs/vue3'
+import axios from 'axios'
 
 const fileInput = ref(null);
 const files = ref([]);
-const isUploading = ref(false); // Loading state
+const isUploading = ref(false);
+const processingFiles = ref([]);
+const pollingInterval = ref(null);
 
 const form = useForm({
     files: [],
 });
+
+// Start polling for file status updates
+const startStatusPolling = () => {
+    if (pollingInterval.value) return;
+    
+    checkFileStatus();
+    pollingInterval.value = setInterval(checkFileStatus, 3000);
+};
+
+// Stop polling when component is unmounted
+onUnmounted(() => {
+    if (pollingInterval.value) {
+        clearInterval(pollingInterval.value);
+    }
+});
+
+// Check file processing status
+const checkFileStatus = () => {
+    axios.get('/upload-status')
+        .then(response => {
+            processingFiles.value = response.data;
+            
+            // If all files are completed, stop polling
+            if (processingFiles.value.length > 0 && 
+                processingFiles.value.every(file => file.status === 'completed')) {
+                if (pollingInterval.value) {
+                    clearInterval(pollingInterval.value);
+                    pollingInterval.value = null;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error checking file status:', error);
+        });
+};
 
 const triggerFileInput = () => {
     fileInput.value.click();
@@ -32,12 +70,15 @@ const uploadFiles = () => {
     isUploading.value = true;
 
     form.post("/upload-sheet", {
-        onSuccess: () => {
-            alert("Files uploaded successfully!");
+        onSuccess: (response) => {
+            // Clear file input
             files.value = [];
             form.files = [];
-            fileInput.value.value = ""; // Reset input field
+            fileInput.value.value = "";
             isUploading.value = false;
+            
+            // Start polling for status updates
+            startStatusPolling();
         },
         onError: (errors) => {
             alert("File upload failed! " + JSON.stringify(errors));
@@ -104,6 +145,7 @@ const confirmDeletion = () => {
                     </Button>
                 </div>
 
+                <!-- Selected files waiting to be uploaded -->
                 <ul v-if="files.length" class="mt-6 space-y-2">
                     <li
                         v-for="(file, index) in files"
@@ -113,10 +155,50 @@ const confirmDeletion = () => {
                     >
                         <span class="truncate">{{ file.name }}</span>
                         <span class="text-yellow-600 text-sm ml-2">
-              {{ (file.size / 1024).toFixed(2) }} KB
-            </span>
+                            {{ (file.size / 1024).toFixed(2) }} KB
+                        </span>
                     </li>
                 </ul>
+                
+                <!-- Processing files status -->
+                <div v-if="processingFiles.length" class="mt-6">
+                    <h3 class="font-semibold text-lg mb-2">Processing Files</h3>
+                    <ul class="space-y-2">
+                        <li
+                            v-for="(file, index) in processingFiles"
+                            :key="index"
+                            :class="{
+                                'p-3 rounded-lg border flex flex-col gap-1': true,
+                                'bg-yellow-100/70 border-yellow-200 text-yellow-900': file.status === 'queued' || file.status === 'processing',
+                                'bg-green-100/70 border-green-200 text-green-900': file.status === 'completed',
+                                'bg-red-100/70 border-red-200 text-red-900': file.status === 'error'
+                            }"
+                        >
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">{{ file.name }}</span>
+                                <span class="text-sm">
+                                    <span v-if="file.status === 'queued'">Queued</span>
+                                    <span v-else-if="file.status === 'processing'">Processing</span>
+                                    <span v-else-if="file.status === 'completed'">Completed</span>
+                                    <span v-else-if="file.status === 'error'">Error</span>
+                                </span>
+                            </div>
+                            
+                            <!-- Progress bar -->
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div 
+                                    class="h-2.5 rounded-full transition-all duration-300 ease-in-out" 
+                                    :class="{
+                                        'bg-yellow-400': file.status === 'queued' || file.status === 'processing',
+                                        'bg-green-500': file.status === 'completed',
+                                        'bg-red-500': file.status === 'error'
+                                    }"
+                                    :style="{ width: file.progress + '%' }"
+                                ></div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>

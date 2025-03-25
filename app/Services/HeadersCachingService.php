@@ -17,8 +17,10 @@ class HeadersCachingService
 
     public function get(array $headers)
     {
+        Log::channel('dbg')->info($headers);
         $headers = base64_encode(json_encode($headers));
         $output = $this->repository->find($headers);
+        Log::channel('dbg')->info($output);
         return json_decode(base64_decode($output), true);
     }
 }

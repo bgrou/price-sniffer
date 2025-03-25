@@ -31,7 +31,7 @@ class ExchangeRatesApi extends Command
     {
         $accessKey = '452198bcf15af9d028077d1bd78f4a3b';
         $base = 'EUR';
-        $symbols = 'EUR,GBP,AUD,BRL,CAD,CNY,HKD,SGD,TRY';
+        $symbols = 'EUR,GBP,USD,AUD,BRL,CAD,CNY,HKD,SGD,TRY';
 
         try {
             $response = Http::get('https://api.exchangeratesapi.io/v1/latest', [
