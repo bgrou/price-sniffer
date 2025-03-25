@@ -134,12 +134,15 @@ class ChunkedSheetImport implements ToCollection, WithChunkReading
         $result = [];
         foreach ($data as $row) {
             Log::channel('dbg')->info(print_r($row,true));
+            Log::channel('dbg')->info(print_r($row,true));
             if ($this->isRowEmpty($row)) {
+            Log::channel('dbg')->info("Row empty");
             Log::channel('dbg')->info("Row empty");
                 continue;
             }
 
             if (!$this->headersFound && $this->containsHeader($row)) {
+                Log::channel('dbg')->info("Header Found");
                 Log::channel('dbg')->info("Header Found");
 
                 $this->headersFound = true;
@@ -147,15 +150,19 @@ class ChunkedSheetImport implements ToCollection, WithChunkReading
 
                 if (!$cache) {
                     Log::channel('dbg')->info("Ai used for headers");
+                    Log::channel('dbg')->info("Ai used for headers");
                     $this->headersPos = $this->ai->request($row)->original;
                     $this->headersCachingService->firstOrCreate($row, $this->headersPos);
                 } else {
                     Log::channel('dbg')->info("Cache used for headers");
+                    Log::channel('dbg')->info("Cache used for headers");
                     $this->headersPos = $cache;
                 }
                 Log::channel('dbg')->info("Header Positions: " . print_r($this->headersPos, true));
+                Log::channel('dbg')->info("Header Positions: " . print_r($this->headersPos, true));
                 continue;
             }
+            Log::channel('dbg')->info("Row processing:");
             Log::channel('dbg')->info("Row processing:");
             if ($this->headersFound) {
                 $extractedFields = [];
@@ -164,7 +171,10 @@ class ChunkedSheetImport implements ToCollection, WithChunkReading
                     $position = $this->headersPos[$field] ?? null;
 
                     Log::channel('dbg')->info("Position: " . $position);
+                    Log::channel('dbg')->info("Position: " . $position);
                     $extractedFields[$field] = ($position !== null && isset($row[$position])) ? $row[$position] : null;
+                    Log::channel('dbg')->info("Extracted Field: " . $extractedFields[$field]);
+                    Log::channel('dbg')->info("Extracted Fields: " . print_r($extractedFields, true));
                     Log::channel('dbg')->info("Extracted Field: " . $extractedFields[$field]);
                     Log::channel('dbg')->info("Extracted Fields: " . print_r($extractedFields, true));
                 }
@@ -172,6 +182,7 @@ class ChunkedSheetImport implements ToCollection, WithChunkReading
                     $result[] = $extractedFields;
                 }
             }
+            Log::channel('dbg')->info(print_r($result,true));
             Log::channel('dbg')->info(print_r($result,true));
         }
         return $result;

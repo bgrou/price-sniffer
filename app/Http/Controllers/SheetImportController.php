@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 class SheetImportController extends Controller
 {
     public function __construct(private SheetImportService $service){}
-    public function import(SheetImportRequest $request): \Illuminate\Http\RedirectResponse
+    public function import(SheetImportRequest $request)
     {
         $uploadedFiles = [];
         $fileCount = count($request->file('files'));
